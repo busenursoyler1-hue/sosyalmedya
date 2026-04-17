@@ -1,6 +1,12 @@
 ﻿import streamlit as st
 from playwright.sync_api import sync_playwright
 import re
+import os  # <-- Bunu ekledik
+
+# --- ÖNEMLİ: Playwright Kurulum Tetikleyicisi ---
+# Bu satır, uygulama Streamlit Cloud'da ilk açıldığında tarayıcıyı yükler.
+if not os.path.exists("/home/appuser/.cache/ms-playwright"):
+    os.system("playwright install chromium")
 
 # Sayfa ayarları
 st.set_page_config(page_title="MY-Sosyal Medya Analiz Aracı", layout="centered")
@@ -19,6 +25,7 @@ def temizle_profil_adi(ad, url):
 def sorgu_motoru(url):
     with sync_playwright() as p:
         try:
+            # Headless True olmalı (Sunucu üzerinde ekran yok)
             browser = p.chromium.launch(headless=True)
             context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
             page = context.new_page()
@@ -74,8 +81,9 @@ with tab2:
         if val:
             v = val.replace("@", "")
             if "Kullanıcı Adı" in mod:
-                url = {"X": f"https://x.com/{v}", "Facebook": f"https://www.facebook.com/{v}", 
-                       "Instagram": f"https://www.instagram.com/{v}", "TikTok": f"https://www.tiktok.com/@{v}"}[platform]
+                url_dict = {"X": f"https://x.com/{v}", "Facebook": f"https://www.facebook.com/{v}", 
+                       "Instagram": f"https://www.instagram.com/{v}", "TikTok": f"https://www.tiktok.com/@{v}"}
+                url = url_dict[platform]
             else:
                 url = f"https://www.facebook.com/profile.php?id={v}" if platform == "Facebook" else None
             
